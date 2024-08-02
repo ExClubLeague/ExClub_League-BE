@@ -23,7 +23,7 @@ public class User {
     @JoinColumn(name = "address_id", referencedColumnName = "addressId")
     private Address address;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY) // 다대다 관계
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
