@@ -1,4 +1,4 @@
-package com.exclub.exclub_league.entity;
+package com.exclub.exclub_league.User.entity;
 
 import jakarta.persistence.*;
 

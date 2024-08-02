@@ -1,4 +1,4 @@
-package com.exclub.exclub_league.entity;
+package com.exclub.exclub_league.User.entity;
 import jakarta.persistence.*;
 
 import java.sql.Timestamp;
@@ -23,7 +23,7 @@ public class User {
     @JoinColumn(name = "address_id", referencedColumnName = "addressId")
     private Address address;
 
-    @ManyToMany(fetch = FetchType.LAZY) // 다대다 관계
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
