@@ -1,12 +1,10 @@
 package com.exclub.exclub_league.Team.enetity;
+import com.exclub.exclub_league.User.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.springframework.data.annotation.Id;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
