@@ -1,4 +1,5 @@
 package com.exclub.exclub_league.config;
+import com.exclub.exclub_league.User.respository.UserMapper;
 import com.exclub.exclub_league.config.jwt.TokenAuthenticationFilter;
 import com.exclub.exclub_league.config.oauth.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import com.exclub.exclub_league.config.oauth.OAuth2SuccessHandler;
@@ -24,6 +25,9 @@ import com.exclub.exclub_league.config.oauth.OAuth2UserCustomService;
 import com.exclub.exclub_league.config.jwt.TokenProvider;
 import com.exclub.exclub_league.config.jwt.RefreshTokenRepository;
 import com.exclub.exclub_league.User.service.UserService;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 
 @RequiredArgsConstructor
 @Configuration
@@ -32,7 +36,6 @@ public class WebOAuthSecurityConfig {
     private final OAuth2UserCustomService oAuth2UserCustomService;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final UserDetailService userDetailService;
     private final UserService userService;
     @Bean
     public WebSecurityCustomizer configure() { // 스프링 시큐리티 기능 비활성화
@@ -60,14 +63,10 @@ public class WebOAuthSecurityConfig {
                 // 접근 권한 설정
                 .authorizeRequests(auth -> auth
                         // 특정 엔드포인트에 대한 접근 허용
-                        .requestMatchers(
-                                new AntPathRequestMatcher("/login"),
-                                new AntPathRequestMatcher("/signup"),
-                                new AntPathRequestMatcher("/user"),
-                                new AntPathRequestMatcher("/api/token")
-                        ).permitAll()
-                        // "/api/**" 엔드포인트에 대해 인증 필요
-                        .requestMatchers(new AntPathRequestMatcher("/api/**")).authenticated()
+                        // 'auth'로 시작하는 엔드포인트에 대한 접근 허용 (인증 필요 없음)
+                        .requestMatchers("/auth/**", "/signup", "/user", "/api/token").permitAll()
+                        // 'api'로 시작하는 엔드포인트에 대해 인증 필요
+                        .requestMatchers("/api/**").authenticated()
                         // 그 외 모든 요청에 대해 접근 허용
                         .anyRequest().permitAll())
                 // OAuth2 로그인 설정
@@ -96,6 +95,7 @@ public class WebOAuthSecurityConfig {
                         ))
                 .build();
     }
+
 
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler() {
@@ -127,5 +127,24 @@ public class WebOAuthSecurityConfig {
     @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
         return new OAuth2AuthorizationRequestBasedOnCookieRepository();
+    }
+
+    @Bean
+    public UserMapper userMapper() { // 회원 변경을 위한
+        return UserMapper.INSTANCE;
+    }
+
+    @Bean
+    public OpenAPI openAPI() { // Swagger 사용에 필요
+        return new OpenAPI()
+                .components(new Components())
+                .info(apiInfo());
+    }
+
+    private Info apiInfo() { // Swagger 사용에 필요
+        return new Info()
+                .title("Spring Boot REST API Specifications")
+                .description("Specification")
+                .version("1.0.0");
     }
 }

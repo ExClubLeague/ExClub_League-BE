@@ -1,17 +1,15 @@
 package com.exclub.exclub_league.User.service;
-import java.time.Duration;
-import com.exclub.exclub_league.User.dto.LoginResponseDTO;
 import com.exclub.exclub_league.User.dto.UserRequestDTO;
+import com.exclub.exclub_league.User.dto.UserResponseDTO;
 import com.exclub.exclub_league.User.entity.Address;
 import com.exclub.exclub_league.User.entity.User;
 import com.exclub.exclub_league.User.respository.AddressRepository;
+import com.exclub.exclub_league.User.respository.UserMapper;
 import com.exclub.exclub_league.User.respository.UserRepository;
-import com.exclub.exclub_league.config.jwt.TokenProvider;
-import com.exclub.exclub_league.config.jwt.TokenService;
+import com.exclub.exclub_league.exception.UserNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -55,4 +53,42 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Unexpected user"));
     }
 
+    public UserResponseDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        // UserMapper 객체를 직접 생성
+        UserMapper userMapper = UserMapper.INSTANCE;
+        return userMapper.toUserResponseDTO(user);
+    }
+
+    @Transactional
+    public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
+        UserMapper userMapper = UserMapper.INSTANCE;
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        // 기존 사용자 엔티티를 데이터베이스에서 조회
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        // DTO를 엔티티로 변환하여 기존 사용자 엔티티 업데이트
+        User userUpdates = userMapper.toUser(dto);
+
+        // 기존 유저의 주소 정보를 업데이트
+        Address updatedAddress = userMapper.toAddress(dto.getAddress());
+        existingUser.setAddress(updatedAddress);
+
+        // 기존 유저의 정보를 업데이트
+        userMapper.updateUserFromDTO(dto, existingUser);
+
+        // 비밀번호가 변경되었는지 확인하고 암호화
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            existingUser.setPassword(encoder.encode(dto.getPassword()));
+        }
+
+        // 변경된 사용자 저장
+        User updatedUser = userRepository.save(existingUser);
+
+        // DTO로 변환하여 반환
+        return userMapper.toUserResponseDTO(updatedUser);
+    }
 }

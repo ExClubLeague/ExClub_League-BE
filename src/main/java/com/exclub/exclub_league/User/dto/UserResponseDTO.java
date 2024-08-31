@@ -1,7 +1,12 @@
 package com.exclub.exclub_league.User.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Setter
+@Getter
 public class UserResponseDTO {
     private Long id;
     private String userName;

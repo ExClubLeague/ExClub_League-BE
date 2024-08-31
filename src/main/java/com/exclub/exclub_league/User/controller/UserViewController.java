@@ -14,4 +14,7 @@ public class UserViewController {
     public String signup() {
         return "signup";
     }
+
+    @GetMapping("/OAuth2LoginSuccess")
+    public String aa(){ return "OAuth2LoginSuccess"; }
 }

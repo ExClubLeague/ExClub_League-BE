@@ -1,5 +1,4 @@
 package com.exclub.exclub_league.config.jwt;
-import com.exclub.exclub_league.User.dto.LoginResponseDTO;
 import com.exclub.exclub_league.User.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,6 @@ public class TokenService {
     private final TokenProvider tokenProvider;
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     public String createNewAccessToken(String refreshToken) {
         if(!tokenProvider.validToken(refreshToken)) {

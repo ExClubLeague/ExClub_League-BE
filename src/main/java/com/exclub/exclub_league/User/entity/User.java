@@ -69,7 +69,7 @@ public class User implements UserDetails {
 
     @Override // 사용자의 id를 반환
     public String getUsername() {
-        return this.email;
+        return this.userName;
     }
 
     @Override
