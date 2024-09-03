@@ -34,7 +34,7 @@ public class UserService {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
         // 사용자가 입력한 사용자 이름이 이미 존재하는지 확인
-        if (userRepository.existsByUsername(dto.getUserName())) {
+        if (userRepository.existsByUserName(dto.getUserName())) {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
 
