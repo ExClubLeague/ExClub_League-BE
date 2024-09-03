@@ -3,9 +3,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Table(name = "users")
 @Entity
@@ -47,6 +50,13 @@ public class User implements UserDetails {
     @JoinColumn(name = "address_id", referencedColumnName = "addressId")
     private Address address;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -59,7 +69,9 @@ public class User implements UserDetails {
 
     @Override // 권한반환
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList());
     }
 
     @Override // 사용자의 패스워드 반환

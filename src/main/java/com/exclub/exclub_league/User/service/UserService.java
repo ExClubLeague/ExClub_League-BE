@@ -4,42 +4,55 @@ import com.exclub.exclub_league.User.dto.UserResponseDTO;
 import com.exclub.exclub_league.User.entity.Address;
 import com.exclub.exclub_league.User.entity.User;
 import com.exclub.exclub_league.User.respository.AddressRepository;
+import com.exclub.exclub_league.User.respository.RoleRepository;
 import com.exclub.exclub_league.User.respository.UserMapper;
 import com.exclub.exclub_league.User.respository.UserRepository;
+import com.exclub.exclub_league.exception.RoleNotFoundException;
 import com.exclub.exclub_league.exception.UserNotFoundException;
+import com.exclub.exclub_league.exception.UsernameAlreadyExistsException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.exclub.exclub_league.User.entity.Role;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    @Autowired
     private final UserRepository userRepository;
+    @Autowired
     private final AddressRepository addressRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 
+    @Transactional
     public Long save(UserRequestDTO dto) {
+        UserMapper userMapper = UserMapper.INSTANCE;
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        // AddressRequestDTO로 Address 엔티티 생성
-        Address address = Address.builder()
-                .state(dto.getAddress().getState())
-                .city(dto.getAddress().getCity())
-                .radius(dto.getAddress().getRadius())
-                .build();
+        // 사용자가 입력한 사용자 이름이 이미 존재하는지 확인
+        if (userRepository.existsByUsername(dto.getUserName())) {
+            throw new UsernameAlreadyExistsException("Username already exists");
+        }
 
-        addressRepository.save(address);
+        // AddressRequestDTO를 Address 엔티티로 변환
+        Address address = userMapper.toAddress(dto.getAddress());
+        addressRepository.save(address);  // 변환된 Address 엔티티를 데이터베이스에 저장
 
-        // UserRequestDTO로 User 엔티티 생성
-        User user = User.builder()
-                .userName(dto.getUserName())
-                .email(dto.getEmail())
-                .phoneNumber(dto.getPhoneNumber())
-                .birthDate(dto.getBirthDate())
-                .password(encoder.encode(dto.getPassword()))
-                .address(address)  // 새로운 Address 연결
-                .build();
+        // UserRequestDTO를 User 엔티티로 변환
+        User user = userMapper.toUser(dto);
+        user.setPassword(encoder.encode(dto.getPassword()));  // 비밀번호를 암호화
+        user.setAddress(address);  // 변환된 Address 엔티티를 User 엔티티에 연결
 
+        // 기본 역할(Role) 설정
+        Role userRole = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new RoleNotFoundException("Role not found: ROLE_USER"));
+        user.setRoles(Set.of(userRole));  // 기본 역할을 User 엔티티에 설정
+
+        // 변환된 User 엔티티를 데이터베이스에 저장하고, 저장된 User의 ID를 반환
         return userRepository.save(user).getId();
     }
 
