@@ -1,18 +1,16 @@
 package com.exclub.exclub_league.Team.repository;
-import com.exclub.exclub_league.Team.dto.TeamAttributesDTO;
-import com.exclub.exclub_league.Team.dto.TeamDTO;
-import com.exclub.exclub_league.Team.dto.TeamPerformanceDTO;
-import com.exclub.exclub_league.Team.entity.Team;
-import com.exclub.exclub_league.Team.entity.TeamAttributes;
-import com.exclub.exclub_league.Team.entity.TeamPerformance;
+import com.exclub.exclub_league.Team.dto.*;
+import com.exclub.exclub_league.Team.entity.*;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface TeamMapper {
 
-    TeamDTO toDto(Team team);
+    TeamDTO toDto(Team team); // Team 엔티티 -> TeamDTO
 
-    Team toEntity(TeamDTO teamDTO);
+    @Mapping(source = "name", target = "name")
+    Team toEntity(TeamDTO teamDTO); // TeamDTO -> Team 엔티티
 
     TeamPerformanceDTO toPerformanceDto(TeamPerformance performance);
 
@@ -21,4 +19,13 @@ public interface TeamMapper {
     TeamAttributesDTO toAttributesDto(TeamAttributes attributes);
 
     TeamAttributes toAttributesEntity(TeamAttributesDTO attributesDTO);
+
+    LocationDTO toLocationDto(Location location);
+
+    Location toLocationEntity(LocationDTO locationDTO);
+
+    // Stadium 관련 매핑 메서드 추가
+    StadiumDTO toStadiumDto(Stadium stadium);
+
+    Stadium toStadiumEntity(StadiumDTO stadiumDTO);
 }

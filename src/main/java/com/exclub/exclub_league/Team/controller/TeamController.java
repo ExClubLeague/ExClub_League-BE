@@ -3,6 +3,7 @@ import com.exclub.exclub_league.Team.dto.TeamAttributesDTO;
 import com.exclub.exclub_league.Team.dto.TeamDTO;
 import com.exclub.exclub_league.Team.dto.TeamPerformanceDTO;
 import com.exclub.exclub_league.Team.service.TeamService;
+import com.exclub.exclub_league.User.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import java.util.List;
 public class TeamController {
 
     private final TeamService teamService;
+    private final UserService userService;
 
     @GetMapping
     @Operation(summary = "모든 팀 조회", description = "모든 팀의 목록을 조회합니다.")
