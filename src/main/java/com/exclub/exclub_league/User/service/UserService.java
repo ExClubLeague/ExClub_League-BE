@@ -13,11 +13,18 @@ import com.exclub.exclub_league.exception.UsernameAlreadyExistsException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.exclub.exclub_league.User.entity.Role;
-import java.util.Set;
 
+import java.util.Optional;
+import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.server.ResponseStatusException;
+
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -62,8 +69,9 @@ public class UserService {
     }
 
     public User findByEmail(String email) {
+        log.info("이메일로 사용자 찾기 시도: {}", email);
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Unexpected user"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
     }
 
     public UserResponseDTO getUserById(Long id) {

@@ -46,7 +46,7 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @ManyToOne(cascade = CascadeType.PERSIST) // 이 부분을 수정했습니다.
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "address_id", referencedColumnName = "addressId")
     private Address address;
 

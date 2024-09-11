@@ -18,8 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TeamService {
@@ -32,7 +34,6 @@ public class TeamService {
         User user = getAuthenticatedUser();
         Team team = convertToTeamEntity(teamDTO);
         team.setCreatedBy(user);
-
         Team savedTeam = saveTeam(team);
         return convertToTeamDTO(savedTeam);
     }
@@ -40,13 +41,14 @@ public class TeamService {
     private User getAuthenticatedUser() {  // 팀 생성 서브 메소드 - 1
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
+            log.error("사용자 인증 정보가 없습니다.");
             throw new AuthenticationCredentialsNotFoundException("사용자 인증 정보가 없습니다.");
         }
         String username = authentication.getName();
         return findUserByEmail(username);
     }
 
-    private User findUserByEmail(String email) {  // 팀 생성 서브 메소드 - 2
+    private User findUserByEmail(String email) {
         try {
             User user = userService.findByEmail(email);
             if (user == null) {
@@ -54,6 +56,8 @@ public class TeamService {
             }
             return user;
         } catch (Exception e) {
+            log.error("사용자 정보를 조회하는 중 오류가 발생했습니다. 에러 메시지: {}", e.getMessage());
+            e.printStackTrace();  // 예외의 상세한 스택 트레이스를 콘솔에 출력
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "사용자 정보를 조회하는 중 오류가 발생했습니다.", e);
         }
     }

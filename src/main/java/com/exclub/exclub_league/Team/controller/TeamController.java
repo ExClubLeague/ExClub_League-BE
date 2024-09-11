@@ -13,10 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 @RestController
 @RequestMapping("/api/teams")
 @Tag(name = "팀 API", description = "팀과 관련된 작업을 수행합니다.")
@@ -24,7 +26,6 @@ import java.util.List;
 public class TeamController {
 
     private final TeamService teamService;
-    private final UserService userService;
 
     @GetMapping
     @Operation(summary = "모든 팀 조회", description = "모든 팀의 목록을 조회합니다.")

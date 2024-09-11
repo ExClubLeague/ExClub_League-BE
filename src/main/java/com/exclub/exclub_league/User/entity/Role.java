@@ -19,6 +19,7 @@ public class Role {
 
     @Column(unique = true, nullable = false)
     private String name; // e.g., ROLE_USER, ROLE_ADMIN, ROLE_CAPTAIN자, ROLE_COORDINATOR, ROLE_MEMBER
+
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
 }
