@@ -62,7 +62,8 @@ public class WebOAuthSecurityConfig {
                 // 접근 권한 설정
                 .authorizeRequests(auth -> auth
                         .requestMatchers("/auth/**", "/signup", "/user", "/api/token").permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/public/**").permitAll()  // 인증이 필요 없는 경로
+                        .requestMatchers("/api/**").authenticated()     // 인증이 필요한 경로
                         .anyRequest().permitAll())
                 // OAuth2 로그인 설정
                 .oauth2Login(oauth2 -> oauth2

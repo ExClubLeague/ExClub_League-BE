@@ -9,6 +9,10 @@ public interface TeamMapper {
 
     TeamDTO toDto(Team team); // Team 엔티티 -> TeamDTO
 
+    @Mapping(source = "stadium", target = "stadium")
+    @Mapping(source = "location", target = "location")
+    @Mapping(source = "performance", target = "performance")
+    @Mapping(source = "attributes", target = "attributes")
     @Mapping(source = "name", target = "name")
     Team toEntity(TeamDTO teamDTO); // TeamDTO -> Team 엔티티
 

@@ -10,6 +10,7 @@ import com.exclub.exclub_league.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.exclub.exclub_league.Team.dto.TeamDTO;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -102,76 +103,120 @@ public class TeamService {
 
     @Transactional
     public TeamDTO updateTeam(Long id, TeamDTO teamDTO) {
-        // Check if the team exists
+        // 팀이 존재하는지 확인
         Team existingTeam = teamRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("팀을 찾을 수 없습니다. ID: " + id));
 
-        // Map DTO to Entity
-        Team updatedTeam = teamMapper.toEntity(teamDTO);
+        // 인증된 사용자 정보 가져오기
+        User authenticatedUser = getAuthenticatedUser();
 
-        // Keep the existing ID
-        updatedTeam.setId(existingTeam.getId());
+        // 인증된 사용자가 팀 생성자인지 확인
+        if (!existingTeam.getCreatedBy().getId().equals(authenticatedUser.getId())) {
+            throw new AccessDeniedException("이 팀을 수정할 권한이 없습니다.");
+        }
 
-        // Save the updated entity
-        Team savedTeam = teamRepository.save(updatedTeam);
+        // 팀 DTO에서 null이 아닌 값만 기존 팀의 값을 업데이트
+        if (teamDTO.getName() != null) {
+            existingTeam.setName(teamDTO.getName());
+        }
+        if (teamDTO.getCode() != null) {
+            existingTeam.setCode(teamDTO.getCode());
+        }
+        if (teamDTO.getLogoUrl() != null) {
+            existingTeam.setLogoUrl(teamDTO.getLogoUrl());
+        }
+        if (teamDTO.getAgeGroup() != null) {
+            existingTeam.setAgeGroup(teamDTO.getAgeGroup());
+        }
+        if (teamDTO.getGender() != null) {
+            existingTeam.setGender(teamDTO.getGender());
+        }
+        if (teamDTO.getSkillLevel() != null) {
+            existingTeam.setSkillLevel(teamDTO.getSkillLevel());
+        }
 
-        // Convert Entity back to DTO
+        // Stadium, Location, Performance, Attributes 업데이트
+        if (teamDTO.getStadium() != null) {
+            existingTeam.setStadium(teamMapper.toStadiumEntity(teamDTO.getStadium()));
+        }
+        if (teamDTO.getLocation() != null) {
+            existingTeam.setLocation(teamMapper.toLocationEntity(teamDTO.getLocation()));
+        }
+        if (teamDTO.getPerformance() != null) {
+            existingTeam.setPerformance(teamMapper.toPerformanceEntity(teamDTO.getPerformance()));
+        }
+        if (teamDTO.getAttributes() != null) {
+            existingTeam.setAttributes(teamMapper.toAttributesEntity(teamDTO.getAttributes()));
+        }
+
+        // 수정된 엔티티 저장
+        Team savedTeam = teamRepository.save(existingTeam);
+
+        // 엔티티를 DTO로 변환하여 반환
         return teamMapper.toDto(savedTeam);
     }
 
     @Transactional
     public void deleteTeam(Long id) {
-        // Check if the team exists
+        // 삭제할 팀을 조회
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + id));
 
-        // Delete the entity
+        // 인증된 사용자 정보 가져오기
+        User authenticatedUser = getAuthenticatedUser();
+
+        // 인증된 사용자가 팀 생성자인지 확인
+        if (!team.getCreatedBy().getId().equals(authenticatedUser.getId())) {
+            throw new AccessDeniedException("이 팀을 삭제할 권한이 없습니다.");
+        }
+
+        // 해당 팀을 삭제
         teamRepository.delete(team);
     }
-
-    @Transactional(readOnly = true)
-    public TeamPerformanceDTO getTeamPerformance(Long teamId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
-
-        TeamPerformance performance = team.getPerformance();
-        return teamMapper.toPerformanceDto(performance);
-    }
-
-    @Transactional
-    public TeamPerformanceDTO updateTeamPerformance(Long teamId, TeamPerformanceDTO performanceDTO) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
-
-        TeamPerformance performance = teamMapper.toPerformanceEntity(performanceDTO);
-        performance.setId(team.getPerformance().getId());
-
-        team.setPerformance(performance);
-        teamRepository.save(team);
-
-        return teamMapper.toPerformanceDto(performance);
-    }
-
-    @Transactional(readOnly = true)
-    public TeamAttributesDTO getTeamAttributes(Long teamId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
-
-        TeamAttributes attributes = team.getAttributes();
-        return teamMapper.toAttributesDto(attributes);
-    }
-
-    @Transactional
-    public TeamAttributesDTO updateTeamAttributes(Long teamId, TeamAttributesDTO attributesDTO) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
-
-        TeamAttributes attributes = teamMapper.toAttributesEntity(attributesDTO);
-        attributes.setId(team.getAttributes().getId());
-
-        team.setAttributes(attributes);
-        teamRepository.save(team);
-
-        return teamMapper.toAttributesDto(attributes);
-    }
+//
+//    @Transactional(readOnly = true)
+//    public TeamPerformanceDTO getTeamPerformance(Long teamId) {
+//        Team team = teamRepository.findById(teamId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
+//
+//        TeamPerformance performance = team.getPerformance();
+//        return teamMapper.toPerformanceDto(performance);
+//    }
+//
+//    @Transactional
+//    public TeamPerformanceDTO updateTeamPerformance(Long teamId, TeamPerformanceDTO performanceDTO) {
+//        Team team = teamRepository.findById(teamId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
+//
+//        TeamPerformance performance = teamMapper.toPerformanceEntity(performanceDTO);
+//        performance.setId(team.getPerformance().getId());
+//
+//        team.setPerformance(performance);
+//        teamRepository.save(team);
+//
+//        return teamMapper.toPerformanceDto(performance);
+//    }
+//
+//    @Transactional(readOnly = true)
+//    public TeamAttributesDTO getTeamAttributes(Long teamId) {
+//        Team team = teamRepository.findById(teamId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
+//
+//        TeamAttributes attributes = team.getAttributes();
+//        return teamMapper.toAttributesDto(attributes);
+//    }
+//
+//    @Transactional
+//    public TeamAttributesDTO updateTeamAttributes(Long teamId, TeamAttributesDTO attributesDTO) {
+//        Team team = teamRepository.findById(teamId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
+//
+//        TeamAttributes attributes = teamMapper.toAttributesEntity(attributesDTO);
+//        attributes.setId(team.getAttributes().getId());
+//
+//        team.setAttributes(attributes);
+//        teamRepository.save(team);
+//
+//        return teamMapper.toAttributesDto(attributes);
+//    }
 }

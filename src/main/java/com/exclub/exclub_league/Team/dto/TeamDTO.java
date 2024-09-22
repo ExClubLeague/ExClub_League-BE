@@ -1,4 +1,5 @@
 package com.exclub.exclub_league.Team.dto;
+import com.exclub.exclub_league.User.entity.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 

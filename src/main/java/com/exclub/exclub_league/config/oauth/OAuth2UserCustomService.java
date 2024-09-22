@@ -13,7 +13,6 @@ import com.exclub.exclub_league.User.respository.RoleRepository;
 import com.exclub.exclub_league.User.respository.UserRepository;
 import com.exclub.exclub_league.User.entity.User;
 
-
 @RequiredArgsConstructor
 @Service
 public class OAuth2UserCustomService extends DefaultOAuth2UserService {

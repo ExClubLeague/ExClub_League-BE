@@ -3,7 +3,6 @@ import com.exclub.exclub_league.Team.dto.TeamAttributesDTO;
 import com.exclub.exclub_league.Team.dto.TeamDTO;
 import com.exclub.exclub_league.Team.dto.TeamPerformanceDTO;
 import com.exclub.exclub_league.Team.service.TeamService;
-import com.exclub.exclub_league.User.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,17 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
-
 @Slf4j
 @RestController
-@RequestMapping("/api/teams")
+@RequestMapping("/api")
 @Tag(name = "팀 API", description = "팀과 관련된 작업을 수행합니다.")
 @RequiredArgsConstructor
 public class TeamController {
 
     private final TeamService teamService;
 
-    @GetMapping
+    @GetMapping("/public/teams")
     @Operation(summary = "모든 팀 조회", description = "모든 팀의 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "팀 목록 조회 성공")
     public ResponseEntity<List<TeamDTO>> getAllTeams() {
@@ -35,7 +33,7 @@ public class TeamController {
         return ResponseEntity.ok(teams);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/teams/{id}")
     @Operation(summary = "ID로 팀 조회", description = "ID를 통해 특정 팀을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "팀 조회 성공"),
@@ -47,7 +45,7 @@ public class TeamController {
         return ResponseEntity.ok(team);
     }
 
-    @PostMapping
+    @PostMapping("/teams")
     @Operation(summary = "팀 생성", description = "새 팀을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "팀 생성 성공")
     @PreAuthorize("isAuthenticated()")
@@ -56,7 +54,7 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTeam);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/teams/{id}")
     @Operation(summary = "팀 업데이트", description = "ID를 통해 팀 정보를 업데이트합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "팀 업데이트 성공"),
@@ -69,7 +67,7 @@ public class TeamController {
         return ResponseEntity.ok(updatedTeam);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/teams/{id}")
     @Operation(summary = "팀 삭제", description = "ID를 통해 팀을 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "팀 삭제 성공"),
@@ -81,53 +79,53 @@ public class TeamController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{teamId}/performance")
-    @Operation(summary = "팀 성과 조회", description = "팀의 성과 정보를 조회합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "성과 조회 성공"),
-            @ApiResponse(responseCode = "404", description = "팀을 찾을 수 없음")
-    })
-    public ResponseEntity<TeamPerformanceDTO> getTeamPerformance(
-            @Parameter(description = "팀 ID", example = "1") @PathVariable Long teamId) {
-        TeamPerformanceDTO performance = teamService.getTeamPerformance(teamId);
-        return ResponseEntity.ok(performance);
-    }
-
-    @PutMapping("/{teamId}/performance")
-    @Operation(summary = "팀 성과 업데이트", description = "팀의 성과 정보를 업데이트합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "성과 업데이트 성공"),
-            @ApiResponse(responseCode = "404", description = "팀을 찾을 수 없음")
-    })
-    public ResponseEntity<TeamPerformanceDTO> updateTeamPerformance(
-            @Parameter(description = "팀 ID", example = "1") @PathVariable Long teamId,
-            @RequestBody TeamPerformanceDTO performanceDTO) {
-        TeamPerformanceDTO updatedPerformance = teamService.updateTeamPerformance(teamId, performanceDTO);
-        return ResponseEntity.ok(updatedPerformance);
-    }
-
-    @GetMapping("/{teamId}/attributes")
-    @Operation(summary = "팀 속성 조회", description = "팀의 속성 정보를 조회합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "속성 조회 성공"),
-            @ApiResponse(responseCode = "404", description = "팀을 찾을 수 없음")
-    })
-    public ResponseEntity<TeamAttributesDTO> getTeamAttributes(
-            @Parameter(description = "팀 ID", example = "1") @PathVariable Long teamId) {
-        TeamAttributesDTO attributes = teamService.getTeamAttributes(teamId);
-        return ResponseEntity.ok(attributes);
-    }
-
-    @PutMapping("/{teamId}/attributes")
-    @Operation(summary = "팀 속성 업데이트", description = "팀의 속성 정보를 업데이트합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "속성 업데이트 성공"),
-            @ApiResponse(responseCode = "404", description = "팀을 찾을 수 없음")
-    })
-    public ResponseEntity<TeamAttributesDTO> updateTeamAttributes(
-            @Parameter(description = "팀 ID", example = "1") @PathVariable Long teamId,
-            @RequestBody TeamAttributesDTO attributesDTO) {
-        TeamAttributesDTO updatedAttributes = teamService.updateTeamAttributes(teamId, attributesDTO);
-        return ResponseEntity.ok(updatedAttributes);
-    }
+//    @GetMapping("/teams/{teamId}/performance")
+//    @Operation(summary = "팀 성과 조회", description = "팀의 성과 정보를 조회합니다.")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "성과 조회 성공"),
+//            @ApiResponse(responseCode = "404", description = "팀을 찾을 수 없음")
+//    })
+//    public ResponseEntity<TeamPerformanceDTO> getTeamPerformance(
+//            @Parameter(description = "팀 ID", example = "1") @PathVariable Long teamId) {
+//        TeamPerformanceDTO performance = teamService.getTeamPerformance(teamId);
+//        return ResponseEntity.ok(performance);
+//    }
+//
+//    @PutMapping("/{teamId}/performance")
+//    @Operation(summary = "팀 성과 업데이트", description = "팀의 성과 정보를 업데이트합니다.")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "성과 업데이트 성공"),
+//            @ApiResponse(responseCode = "404", description = "팀을 찾을 수 없음")
+//    })
+//    public ResponseEntity<TeamPerformanceDTO> updateTeamPerformance(
+//            @Parameter(description = "팀 ID", example = "1") @PathVariable Long teamId,
+//            @RequestBody TeamPerformanceDTO performanceDTO) {
+//        TeamPerformanceDTO updatedPerformance = teamService.updateTeamPerformance(teamId, performanceDTO);
+//        return ResponseEntity.ok(updatedPerformance);
+//    }
+//
+//    @GetMapping("/public/teams/{teamId}/attributes")
+//    @Operation(summary = "팀 속성 조회", description = "팀의 속성 정보를 조회합니다.")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "속성 조회 성공"),
+//            @ApiResponse(responseCode = "404", description = "팀을 찾을 수 없음")
+//    })
+//    public ResponseEntity<TeamAttributesDTO> getTeamAttributes(
+//            @Parameter(description = "팀 ID", example = "1") @PathVariable Long teamId) {
+//        TeamAttributesDTO attributes = teamService.getTeamAttributes(teamId);
+//        return ResponseEntity.ok(attributes);
+//    }
+//
+//    @PutMapping("/teams/{teamId}/attributes")
+//    @Operation(summary = "팀 속성 업데이트", description = "팀의 속성 정보를 업데이트합니다.")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "속성 업데이트 성공"),
+//            @ApiResponse(responseCode = "404", description = "팀을 찾을 수 없음")
+//    })
+//    public ResponseEntity<TeamAttributesDTO> updateTeamAttributes(
+//            @Parameter(description = "팀 ID", example = "1") @PathVariable Long teamId,
+//            @RequestBody TeamAttributesDTO attributesDTO) {
+//        TeamAttributesDTO updatedAttributes = teamService.updateTeamAttributes(teamId, attributesDTO);
+//        return ResponseEntity.ok(updatedAttributes);
+//    }
 }

@@ -14,7 +14,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import com.exclub.exclub_league.User.entity.Role;
 
@@ -22,7 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.server.ResponseStatusException;
-
 
 @Slf4j
 @Service
@@ -34,6 +38,30 @@ public class UserService {
     private final AddressRepository addressRepository;
     @Autowired
     private RoleRepository roleRepository;
+
+    public User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.error("사용자 인증 정보가 없습니다.");
+            throw new AuthenticationCredentialsNotFoundException("사용자 인증 정보가 없습니다.");
+        }
+
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        log.info("OAuth2User attributes: {}", oAuth2User.getAttributes());
+
+        String email = (String) oAuth2User.getAttributes().get("email");
+        if (email == null) {
+            log.error("OAuth2 사용자 정보에서 이메일을 찾을 수 없습니다.");
+            throw new AuthenticationCredentialsNotFoundException("OAuth2 사용자 정보에서 이메일을 찾을 수 없습니다.");
+        }
+
+        return findUserByEmail(email);
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
+    }
 
     @Transactional
     public Long save(UserRequestDTO dto) {

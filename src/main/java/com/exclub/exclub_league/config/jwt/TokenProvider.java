@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
-
 @RequiredArgsConstructor
 @Service
 public class TokenProvider {

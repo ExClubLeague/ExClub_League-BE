@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api")
 @Tag(name = "User API", description = "사용자 관리 API") // Swagger 그룹화
 public class UserApiController {
 
@@ -45,7 +46,7 @@ public class UserApiController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
     })
-    @PostMapping("/auth/signup")
+    @PostMapping("/public/users/signup")
     public ResponseEntity<String> signup(@RequestBody UserRequestDTO request) {
         userService.save(request);
         return ResponseEntity.ok("Sign up successful");
@@ -57,7 +58,7 @@ public class UserApiController {
             @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
     })
-    @PostMapping("/auth/login")
+    @PostMapping("/public/users/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -85,7 +86,7 @@ public class UserApiController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그아웃 성공", content = @Content)
     })
-    @GetMapping("/auth/logout")
+    @GetMapping("/users/logout")
     public String logout(HttpServletRequest request, HttpServletResponse response) {
         new SecurityContextLogoutHandler().logout(request, response,
                 SecurityContextHolder.getContext().getAuthentication());
@@ -109,7 +110,7 @@ public class UserApiController {
             @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content),
             @ApiResponse(responseCode = "404", description = "사용자 없음", content = @Content)
     })
-    @PutMapping("/api/users/{id}")
+    @PutMapping("/users/{id}")
     public ResponseEntity<?> updateUser(
             @PathVariable Long id,
             @RequestBody UserRequestDTO userRequestDTO,

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 @Table(name = "users")
 @Entity
 @Data
