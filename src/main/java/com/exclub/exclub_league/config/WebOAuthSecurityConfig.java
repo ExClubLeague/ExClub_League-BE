@@ -18,7 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.exclub.exclub_league.User.service.UserDetailService;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 import com.exclub.exclub_league.config.oauth.OAuth2UserCustomService;
@@ -37,6 +36,7 @@ public class WebOAuthSecurityConfig {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserService userService;
+
     @Bean
     public WebSecurityCustomizer configure() { // 스프링 시큐리티 기능 비활성화
         return (web) -> web.ignoring()
@@ -47,7 +47,6 @@ public class WebOAuthSecurityConfig {
                         new AntPathRequestMatcher("/js/**")
                 );
     }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -62,12 +61,9 @@ public class WebOAuthSecurityConfig {
                 .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 // 접근 권한 설정
                 .authorizeRequests(auth -> auth
-                        // 특정 엔드포인트에 대한 접근 허용
-                        // 'auth'로 시작하는 엔드포인트에 대한 접근 허용 (인증 필요 없음)
                         .requestMatchers("/auth/**", "/signup", "/user", "/api/token").permitAll()
-                        // 'api'로 시작하는 엔드포인트에 대해 인증 필요
-                        .requestMatchers("/api/**").authenticated()
-                        // 그 외 모든 요청에 대해 접근 허용
+                        .requestMatchers("/api/public/**").permitAll()  // 인증이 필요 없는 경로
+                        .requestMatchers("/api/**").authenticated()     // 인증이 필요한 경로
                         .anyRequest().permitAll())
                 // OAuth2 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
@@ -78,9 +74,9 @@ public class WebOAuthSecurityConfig {
                 )
                 // 기본 로그인 설정 (중복 방지)
                 .formLogin(formLogin -> formLogin
-                        .loginPage("/login") // 로그인 페이지 URL
-                        .loginProcessingUrl("/login") // 로그인 처리 URL
-                        .defaultSuccessUrl("/articles") // 로그인 성공 후 리다이렉트 URL
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/articles")
                 )
                 // 로그아웃 설정
                 .logout(logout -> logout
@@ -89,10 +85,10 @@ public class WebOAuthSecurityConfig {
                 )
                 // 예외 처리 설정
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .defaultAuthenticationEntryPointFor(
-                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                                new AntPathRequestMatcher("/api/**")
-                        ))
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpStatus.UNAUTHORIZED.value(), "인증되지 않은 사용자입니다.");
+                        })
+                )
                 .build();
     }
 
