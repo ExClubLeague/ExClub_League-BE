@@ -58,7 +58,7 @@ public class UserService {
         return findUserByEmail(email);
     }
 
-    private User findUserByEmail(String email) {
+    public User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
     }

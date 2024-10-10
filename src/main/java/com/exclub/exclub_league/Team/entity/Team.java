@@ -57,19 +57,22 @@ public class Team {
     @Column(name = "UPDATED_AT")
     private LocalDateTime updatedAt; // 수정 시간 O
 
-    @OneToOne(cascade = {CascadeType.PERSIST})
+    @Column(name = "IS_LEAGUE_APPLICANT")
+    private boolean isLeagueApplicant; // 리그 신청 여부
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "LOCATION_ID")
-    private Location location; // 위치 엔티티
+    private Location location;
 
-    @OneToOne(cascade = {CascadeType.PERSIST})
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "STADIUM_ID")
-    private Stadium stadium; // 경기장 엔티티
+    private Stadium stadium;
 
-    @OneToOne(cascade = {CascadeType.PERSIST})
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "attributes_id")
-    private TeamAttributes attributes; // 팀의 속성 정보
+    private TeamAttributes attributes;
 
-    @OneToOne(cascade = {CascadeType.PERSIST})
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "performance_id")
     private TeamPerformance performance;
 

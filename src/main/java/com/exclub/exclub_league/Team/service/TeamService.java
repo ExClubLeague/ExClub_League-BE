@@ -1,4 +1,6 @@
 package com.exclub.exclub_league.Team.service;
+import com.exclub.exclub_league.League.entity.RegionCoordinates;
+import com.exclub.exclub_league.League.repository.RegionCoordinatesRepository;
 import com.exclub.exclub_league.Team.dto.TeamAttributesDTO;
 import com.exclub.exclub_league.Team.dto.TeamPerformanceDTO;
 import com.exclub.exclub_league.Team.entity.*;
@@ -29,12 +31,20 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamMapper teamMapper;
     private final UserService userService;
+    private final RegionCoordinatesRepository regionCoordinatesRepository;
 
     @Transactional
     public TeamDTO createTeam(TeamDTO teamDTO) { // 팀 생성 메인 메소드
         User user = getAuthenticatedUser();
+
+        // Location 객체 생성
+        Location location = createLocation(teamDTO);
+
+        // 팀 엔티티 변환 및 설정
         Team team = convertToTeamEntity(teamDTO);
+        team.setLocation(location);
         team.setCreatedBy(user);
+
         Team savedTeam = saveTeam(team);
         return convertToTeamDTO(savedTeam);
     }
@@ -61,6 +71,22 @@ public class TeamService {
             e.printStackTrace();  // 예외의 상세한 스택 트레이스를 콘솔에 출력
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "사용자 정보를 조회하는 중 오류가 발생했습니다.", e);
         }
+    }
+
+    private Location createLocation(TeamDTO teamDTO) { // Location 생성 메소드
+        Location location = new Location();
+        location.setCity(teamDTO.getLocation().getCity());
+        location.setRegion(teamDTO.getLocation().getRegion());
+
+        // 저장된 RegionCoordinates 조회
+        RegionCoordinates regionCoordinates = regionCoordinatesRepository
+                .findByCityAndRegion(teamDTO.getLocation().getCity(), teamDTO.getLocation().getRegion())
+                .orElseThrow(() -> new RuntimeException("지역 좌표 정보가 없습니다."));
+
+        // RegionCoordinates의 ID 값을 Location에 설정
+        location.setRegionCoordinates(regionCoordinates); // RegionCoordinates 객체를 Location에 설정
+
+        return location; // 생성된 Location 객체 반환
     }
 
     private Team convertToTeamEntity(TeamDTO teamDTO) { // 팀 생성 서브 메소드 - 3
