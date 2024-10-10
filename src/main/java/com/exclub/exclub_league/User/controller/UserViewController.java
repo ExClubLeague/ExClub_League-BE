@@ -17,7 +17,7 @@ public class UserViewController {
     }
 
     @GetMapping("/OAuth2LoginSuccess")
-    public String aa() {
-        return "OAuth2LoginSuccess";} // 리액트 경로로 리다이렉트
-
+    public RedirectView aa() {
+        return new RedirectView("http://localhost:3000/main"); // 리액트 경로로 리다이렉트
+    }
 }
