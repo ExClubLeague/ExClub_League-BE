@@ -1,7 +1,5 @@
 package com.exclub.exclub_league.Team.controller;
-import com.exclub.exclub_league.Team.dto.TeamAttributesDTO;
 import com.exclub.exclub_league.Team.dto.TeamDTO;
-import com.exclub.exclub_league.Team.dto.TeamPerformanceDTO;
 import com.exclub.exclub_league.Team.service.TeamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

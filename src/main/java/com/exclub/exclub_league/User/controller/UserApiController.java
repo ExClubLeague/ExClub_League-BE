@@ -93,15 +93,37 @@ public class UserApiController {
         return "logout success";
     }
 
-    @Operation(summary = "사용자 정보 조회", description = "ID를 통해 특정 사용자 정보를 조회합니다.")
+    @Operation(summary = "사용자 정보 조회", description = "엑세스 토큰을 통해 특정 사용자 정보를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "사용자 없음", content = @Content)
     })
-    @GetMapping("/users/{id}")
-    public ResponseEntity<UserResponseDTO> getUser(@PathVariable Long id) {
-        UserResponseDTO userResponseDTO = userService.getUserById(id);
-        return ResponseEntity.ok(userResponseDTO);
+    @GetMapping("/users/me")
+    public ResponseEntity<?> getCurrentUser(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        // Authorization 헤더에서 "Bearer " 부분 제거하고 토큰만 추출
+        String token = authorizationHeader.startsWith("Bearer ")
+                ? authorizationHeader.substring(7)
+                : authorizationHeader;
+
+        try {
+            // 토큰에서 사용자 ID 추출
+            Long userIdFromToken = tokenProvider.getUserId(token);
+
+            // 사용자 ID로 사용자 조회
+            UserResponseDTO userResponseDTO = userService.getUserById(userIdFromToken);
+
+            return ResponseEntity.ok(userResponseDTO);
+        } catch (UserNotFoundException e) {
+            // 사용자 존재하지 않는 예외 처리
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonMap("error", e.getMessage()));
+        } catch (Exception e) {
+            // 일반 예외 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("error", "Failed to retrieve user. " + e.getMessage()));
+        }
     }
 
     @Operation(summary = "사용자 정보 수정", description = "ID를 통해 특정 사용자 정보를 수정합니다.")
@@ -144,4 +166,12 @@ public class UserApiController {
                     .body(Collections.singletonMap("error", "Failed to update user. " + e.getMessage()));
         }
     }
+
+//    @GetMapping("/users/me")
+//    public ResponseEntity<User> getCurrentUser(Authentication authentication) {
+//        // Authentication에서 사용자 정보를 가져옴
+//        String email = authentication.getName(); // OAuth2 인증의 경우, 이메일이 사용자 이름으로 사용될 수 있음
+//        User user = userService.findUserByEmail(email);
+//        return ResponseEntity.ok(user);
+//    }
 }

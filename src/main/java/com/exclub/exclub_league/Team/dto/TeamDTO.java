@@ -1,5 +1,4 @@
 package com.exclub.exclub_league.Team.dto;
-import com.exclub.exclub_league.User.entity.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
@@ -10,6 +9,7 @@ import lombok.*;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TeamDTO {
+    private Long id;
     private String name; // 팀 이름
     private String code; // 팀 코드
     private String logoUrl; // 팀 로고 URL
