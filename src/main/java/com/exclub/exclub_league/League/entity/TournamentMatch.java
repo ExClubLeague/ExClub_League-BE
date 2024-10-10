@@ -25,12 +25,12 @@ public class TournamentMatch {
     @JoinColumn(name = "team1_id", nullable = false)
     private Team team1;
 
-    @ManyToOne
-    @JoinColumn(name = "team2_id", nullable = false)
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "team2_id", nullable = true)
     private Team team2;
 
     @Column(name = "match_date")
-    private LocalDateTime matchDate;
+    private String matchDate;
 
     @Column(name = "city", nullable = false)
     private String city; // 행정구역 정보

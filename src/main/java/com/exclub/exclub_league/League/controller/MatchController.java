@@ -48,10 +48,10 @@ public class MatchController {
             @RequestParam String matchDate) {
         try {
             // 사용자가 전달한 문자열을 LocalDateTime으로 변환
-            LocalDateTime parsedMatchDate = LocalDateTime.parse(matchDate);
+           // LocalDateTime parsedMatchDate = LocalDateTime.parse(matchDate);
 
             // 매칭 날짜 업데이트
-            teamMatchingService.updateMatchDate(matchId, parsedMatchDate);
+            teamMatchingService.updateMatchDate(matchId, matchDate);
             return ResponseEntity.ok("Match date updated successfully.");
         } catch (DateTimeParseException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
