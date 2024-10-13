@@ -28,7 +28,7 @@ public class User implements UserDetails {
     private String password;
 
     @Column(name = "user_name")
-    private String userName;
+    private String username;
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
@@ -38,6 +38,15 @@ public class User implements UserDetails {
 
     @Column(name = "birth_date")
     private String birthDate;
+
+    @Column(name = "age") // 나이 컬럼
+    private Integer age;
+
+    @Column(name = "gender") // 성별 컬럼
+    private String gender;
+
+    @Column(name = "JOINED_TEAM", nullable = false)
+    private Boolean joinedTeam=false;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "created_at")
@@ -61,6 +70,7 @@ public class User implements UserDetails {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        joinedTeam = false; // 기본값을 false로 지정
     }
 
     @PreUpdate
@@ -82,7 +92,7 @@ public class User implements UserDetails {
 
     @Override // 사용자의 id를 반환
     public String getUsername() {
-        return this.userName;
+        return this.username;
     }
 
     @Override
@@ -106,7 +116,7 @@ public class User implements UserDetails {
     }
 
     public User update(String userName) {
-        this.userName = userName;
+        this.username = userName;
         return this;
     }
 }

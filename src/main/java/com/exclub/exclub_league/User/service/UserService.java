@@ -7,6 +7,7 @@ import com.exclub.exclub_league.User.respository.AddressRepository;
 import com.exclub.exclub_league.User.respository.RoleRepository;
 import com.exclub.exclub_league.User.respository.UserMapper;
 import com.exclub.exclub_league.User.respository.UserRepository;
+import com.exclub.exclub_league.config.jwt.TokenProvider;
 import com.exclub.exclub_league.exception.RoleNotFoundException;
 import com.exclub.exclub_league.exception.UserNotFoundException;
 import com.exclub.exclub_league.exception.UsernameAlreadyExistsException;
@@ -38,6 +39,7 @@ public class UserService {
     private final AddressRepository addressRepository;
     @Autowired
     private RoleRepository roleRepository;
+    private TokenProvider tokenProvider;
 
     public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -58,6 +60,18 @@ public class UserService {
         return findUserByEmail(email);
     }
 
+    public void assignCaptainRole(User user) { // 사용자의 역할을 ROLE_CAPTAIN 로 변경하는 메소드
+        // ROLE_CAPTAIN을 찾아서 사용자에게 할당
+        Role captainRole = roleRepository.findByName("ROLE_CAPTAIN")
+                .orElseThrow(() -> new RuntimeException("역할을 찾을 수 없습니다: ROLE_CAPTAIN"));
+
+        // 사용자의 현재 역할에 ROLE_CAPTAIN 추가
+        user.getRoles().add(captainRole);
+
+        // 변경된 사용자 정보를 저장
+        userRepository.save(user);
+    }
+
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
@@ -69,7 +83,7 @@ public class UserService {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
         // 사용자가 입력한 사용자 이름이 이미 존재하는지 확인
-        if (userRepository.existsByUserName(dto.getUserName())) {
+        if (userRepository.existsByUsername(dto.getUsername())) {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
 

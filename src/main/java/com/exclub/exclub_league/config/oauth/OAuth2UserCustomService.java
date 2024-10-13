@@ -44,7 +44,7 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
     private User createNewUser(String email, String name) {
         User user = new User();
         user.setEmail(email);
-        user.setUserName(name);
+        user.setUsername(name);
         user.setPassword(""); // OAuth2 사용자는 일반적으로 비밀번호가 없음
 
         // 기본 역할 ROLE_USER를 할당합니다

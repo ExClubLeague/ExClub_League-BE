@@ -166,12 +166,4 @@ public class UserApiController {
                     .body(Collections.singletonMap("error", "Failed to update user. " + e.getMessage()));
         }
     }
-
-//    @GetMapping("/users/me")
-//    public ResponseEntity<User> getCurrentUser(Authentication authentication) {
-//        // Authentication에서 사용자 정보를 가져옴
-//        String email = authentication.getName(); // OAuth2 인증의 경우, 이메일이 사용자 이름으로 사용될 수 있음
-//        User user = userService.findUserByEmail(email);
-//        return ResponseEntity.ok(user);
-//    }
 }

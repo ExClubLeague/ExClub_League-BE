@@ -14,7 +14,7 @@ import org.mapstruct.Mapping;
 public interface UserMapper { // 객체와 DTO를 매핑하기 위한 Mapper 인터페이스
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-    @Mapping(source = "username", target = "userName")
+    @Mapping(source = "username", target = "username")
     UserResponseDTO toUserResponseDTO(User user);
 
     @Mapping(source = "addressId", target = "addressId")

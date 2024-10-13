@@ -18,7 +18,7 @@ public class Role {
     private Long id; // 역할의 고유 식별
 
     @Column(unique = true, nullable = false)
-    private String name; // e.g., ROLE_USER, ROLE_ADMIN, ROLE_CAPTAIN자, ROLE_COORDINATOR, ROLE_MEMBER
+    private String name; // e.g., ROLE_USER, ROLE_ADMIN, ROLE_CAPTAIN, ROLE_COORDINATOR, ROLE_MEMBER
 
     @ManyToMany(fetch = FetchType.EAGER,mappedBy = "roles")
     private Set<User> users;
