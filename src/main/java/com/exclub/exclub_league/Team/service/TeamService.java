@@ -2,11 +2,14 @@ package com.exclub.exclub_league.Team.service;
 import com.exclub.exclub_league.League.entity.RegionCoordinates;
 import com.exclub.exclub_league.League.repository.RegionCoordinatesRepository;
 import com.exclub.exclub_league.Team.dto.TeamAttributesDTO;
+import com.exclub.exclub_league.Team.dto.TeamMemberDTO;
 import com.exclub.exclub_league.Team.dto.TeamPerformanceDTO;
 import com.exclub.exclub_league.Team.entity.*;
 import com.exclub.exclub_league.Team.repository.TeamMapper;
+import com.exclub.exclub_league.Team.repository.TeamMemberMapper;
 import com.exclub.exclub_league.Team.repository.TeamRepository;
 import com.exclub.exclub_league.User.entity.User;
+import com.exclub.exclub_league.User.respository.UserRepository;
 import com.exclub.exclub_league.User.service.UserService;
 import com.exclub.exclub_league.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +35,8 @@ public class TeamService {
     private final TeamMapper teamMapper;
     private final UserService userService;
     private final RegionCoordinatesRepository regionCoordinatesRepository;
-
+    private final UserRepository userRepository;
+    private final TeamMemberMapper teamMemberMapper; // Mapper 주입
     @Transactional
     public TeamDTO createTeam(TeamDTO teamDTO) { // 팀 생성 메인 메소드
         User user = getAuthenticatedUser();
@@ -46,6 +50,10 @@ public class TeamService {
         team.setCreatedBy(user);
 
         Team savedTeam = saveTeam(team);
+
+        // 팀을 생성한 사용자의 역할을 ROLE_CAPTAIN으로 업데이트
+        userService.assignCaptainRole(user);
+
         return convertToTeamDTO(savedTeam);
     }
 
@@ -113,6 +121,34 @@ public class TeamService {
         }
     }
 
+    @Transactional
+    public void addMemberToTeam(Long teamId, Long userId) { // 팀 가입 메소드
+        // 팀 정보 조회
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("팀을 찾을 수 없습니다."));
+
+        // 사용자 조회
+        User user = userService.findById(userId);
+        if (user == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+
+        // 이미 팀에 가입된 경우 예외 처리
+        if (Boolean.TRUE.equals(user.getJoinedTeam())) {
+            throw new RuntimeException("해당 사용자는 이미 팀에 가입되어 있습니다.");
+        }
+
+        // 팀에 사용자 추가
+        team.getMembers().add(user);
+
+        // 사용자의 joinedTeam 필드를 true로 설정
+        user.setJoinedTeam(true);
+
+        // 팀과 사용자 정보를 저장
+        teamRepository.save(team);
+        userRepository.save(user);
+    }
+
     @Transactional(readOnly = true)
     public List<TeamDTO> getAllTeams() {
         return teamRepository.findAll().stream()
@@ -124,7 +160,22 @@ public class TeamService {
     public TeamDTO getTeamById(Long id) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + id));
-        return teamMapper.toDto(team);
+
+        // 팀원 정보를 가져옴
+        List<User> teamMembers = team.getMembers().stream().collect(Collectors.toList());
+        List<TeamMemberDTO> memberDTOs = teamMembers.stream()
+                .map(teamMemberMapper::toDto)
+                .collect(Collectors.toList());
+
+        // TeamDTO에 팀원 정보 추가
+        TeamDTO teamDTO = teamMapper.toDto(team);
+        teamDTO.setMembers(memberDTOs);
+
+        return teamDTO;
+    }
+
+    private TeamMemberDTO convertToTeamMemberDTO(User user) { // 팀에
+        return teamMemberMapper.toDto(user); // Mapper를 사용하여 변환
     }
 
     @Transactional

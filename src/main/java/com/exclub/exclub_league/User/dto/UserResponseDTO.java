@@ -9,11 +9,12 @@ import java.time.LocalDateTime;
 @Getter
 public class UserResponseDTO {
     private Long id;
-    private String userName;
+    private String username;
     private String email;
     private String phoneNumber;
     private String birthDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private AddressResponseDTO address;  // Address 정보 포함
+    private Boolean joinedTeam;
+   // private AddressResponseDTO address;  // Address 정보 포함
 }
