@@ -1,14 +1,20 @@
 package com.exclub.exclub_league.League.controller;
 
+import com.exclub.exclub_league.League.dto.MatchResultUpdateDTO;
+import com.exclub.exclub_league.League.dto.NextMatchDTO;
+import com.exclub.exclub_league.League.dto.PreviousMatchResultDTO;
 import com.exclub.exclub_league.League.entity.TournamentMatch;
 import com.exclub.exclub_league.League.repository.TournamentMatchRepository;
+import com.exclub.exclub_league.League.service.MatchService;
 import com.exclub.exclub_league.League.service.TeamMatchingService;
+import com.exclub.exclub_league.exception.MatchNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -21,6 +27,7 @@ public class MatchController {
 
     private final TeamMatchingService teamMatchingService;
     private final TournamentMatchRepository matchRepository;
+    private final MatchService matchService;
 
     // 첫번째 라운드 생성
     @PostMapping("/createFirstRound")
@@ -79,5 +86,41 @@ public class MatchController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error updating match result: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/next/{teamId}")
+    public NextMatchDTO getNextMatch(@PathVariable Long teamId) {
+        try {
+            // 다음 경기 정보 조회
+            return matchService.getNextMatch(teamId);
+        } catch (MatchNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "다음 경기를 찾을 수 없습니다.", e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.", e);
+        }
+    }
+
+    @PostMapping("/previous/{teamId}")
+    public ResponseEntity<List<PreviousMatchResultDTO>> getPreviousMatches(@PathVariable Long teamId) {
+        // 이전 경기 결과를 가져오는 서비스 메소드 호출
+        List<PreviousMatchResultDTO> previousMatches = matchService.getPreviousMatchResults(teamId);
+
+        // 결과가 null이면 204 No Content 상태 반환, 아니면 200 OK 상태와 함께 결과 반환
+        if (previousMatches == null || previousMatches.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(previousMatches);
+    }
+
+    @PostMapping("/updateResult")
+    public ResponseEntity<String> updateMatchResult(@RequestBody MatchResultUpdateDTO request) {
+        String responseMessage = matchService.updateMatchResult(request);
+
+        if (responseMessage.equals("No matches found.")) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(responseMessage);
     }
 }

@@ -17,7 +17,7 @@ public class TeamDTO {
     private String code; // 팀 코드
     private String logoUrl; // 팀 로고 URL
     private StadiumDTO stadium; // 경기장 정보
-    private LocationDTO location; // 위치 정보
+    private TeamLocationDTO location; // 위치 정보
     private String ageGroup; // 주요 나이대
     private String gender; // 성별
     private String skillLevel; // 팀 실력

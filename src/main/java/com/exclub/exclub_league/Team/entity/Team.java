@@ -49,7 +49,6 @@ public class Team {
     @Column(name = "IS_ACTIVE")
     private Boolean isActive; // 팀의 활동 상태
 
-
     @ManyToOne
     @JoinColumn(name = "CREATED_BY", referencedColumnName = "id")
     private User createdBy; // 팀을 생성한 사용자 O
@@ -72,8 +71,8 @@ public class Team {
     private Set<User> members = new HashSet<>();
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "LOCATION_ID")
-    private Location location;
+    @JoinColumn(name = "TEAM_LOCATION_ID")
+    private TeamLocation location;
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "STADIUM_ID")
