@@ -42,7 +42,7 @@ public class TeamService {
         User user = getAuthenticatedUser();
 
         // Location 객체 생성
-        Location location = createLocation(teamDTO);
+        TeamLocation location = createLocation(teamDTO);
 
         // 팀 엔티티 변환 및 설정
         Team team = convertToTeamEntity(teamDTO);
@@ -81,8 +81,8 @@ public class TeamService {
         }
     }
 
-    private Location createLocation(TeamDTO teamDTO) { // Location 생성 메소드
-        Location location = new Location();
+    private TeamLocation createLocation(TeamDTO teamDTO) { // Location 생성 메소드
+        TeamLocation location = new TeamLocation();
         location.setCity(teamDTO.getLocation().getCity());
         location.setRegion(teamDTO.getLocation().getRegion());
 
@@ -217,7 +217,7 @@ public class TeamService {
             existingTeam.setStadium(teamMapper.toStadiumEntity(teamDTO.getStadium()));
         }
         if (teamDTO.getLocation() != null) {
-            existingTeam.setLocation(teamMapper.toLocationEntity(teamDTO.getLocation()));
+            existingTeam.setLocation(teamMapper.toTeamLocationEntity(teamDTO.getLocation()));
         }
         if (teamDTO.getPerformance() != null) {
             existingTeam.setPerformance(teamMapper.toPerformanceEntity(teamDTO.getPerformance()));

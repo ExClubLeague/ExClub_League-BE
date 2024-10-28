@@ -44,4 +44,7 @@ public class TournamentMatch {
 
     @Column(name = "round_number", nullable = false)
     private int roundNumber; // 현재 라운드 번호
+
+    @Column(name = "score")
+    private String score; // 경기 결과 점수
 }

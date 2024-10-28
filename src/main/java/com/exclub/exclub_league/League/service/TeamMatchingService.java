@@ -2,7 +2,9 @@ package com.exclub.exclub_league.League.service;
 import com.exclub.exclub_league.League.entity.RegionCoordinates;
 import com.exclub.exclub_league.League.entity.TournamentMatch;
 import com.exclub.exclub_league.League.repository.TournamentMatchRepository;
+import com.exclub.exclub_league.Team.entity.Location;
 import com.exclub.exclub_league.Team.entity.Team;
+import com.exclub.exclub_league.Team.repository.LocationRepository;
 import com.exclub.exclub_league.Team.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,9 @@ public class TeamMatchingService {
 
     @Autowired
     private TournamentMatchRepository matchRepository;
+
+    @Autowired
+    private LocationRepository locationRepository;
 
     /**
      * Haversine 공식을 사용하여 두 위치 간의 거리를 계산하는 메소드
@@ -150,10 +155,16 @@ public class TeamMatchingService {
         // 1. 이전 라운드에서 승리한 팀들 가져오기
         List<TournamentMatch> completedMatches = matchRepository.findByRoundNumberAndCityAndMatchStatus(roundNumber, city, "COMPLETED");
 
+        // 로깅 추가: 완료된 매칭 개수 출력
+        System.out.println("Completed matches found for round " + roundNumber + " in city " + city + ": " + completedMatches.size());
+
         // 2. 승리 팀 리스트 추출
         List<Team> winners = completedMatches.stream()
                 .map(TournamentMatch::getWinnerTeam)
                 .collect(Collectors.toList());
+
+        // 로깅 추가: 승리 팀 목록 출력
+        winners.forEach(winner -> System.out.println("Winner team: " + (winner != null ? winner.getName() : "No winner found")));
 
         return winners; // 다음 라운드로 진출하는 팀 리스트 반환
     }
@@ -191,14 +202,14 @@ public class TeamMatchingService {
      */
     public List<TournamentMatch> createNextRoundMatches(int roundNumber, String city) {
         // 1. 참가한 총 팀 수 가져오기
-        int totalTeams = teamRepository.countByLocation_City(city); // 예시: 특정 도시에서 참여한 팀 수 가져오기
+        int totalTeams = locationRepository.countByCity(city); // 예시: 특정 도시에서 참여한 팀 수 가져오기
 
         // 2. 최대 라운드 수 계산 (로그2로 계산)
         int maxRounds = (int) Math.ceil(Math.log(totalTeams) / Math.log(2));
 
         // 3. 현재 라운드가 최대 라운드를 넘으면 매칭 생성 중단
         if (roundNumber > maxRounds) {
-            System.out.println("더 이상 진행할 라운드가 없습니다. 최대 라운드 수는 " + maxRounds + "입니다.");
+            System.out.println( "총 팀 수 : " + totalTeams +"더 이상 진행할 라운드가 없습니다. 최대 라운드 수는 " + maxRounds + "입니다.");
             return new ArrayList<>(); // 빈 리스트 반환하여 매칭 생성 중단
         }
 

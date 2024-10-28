@@ -24,9 +24,18 @@ public interface TeamMapper {
 
     TeamAttributes toAttributesEntity(TeamAttributesDTO attributesDTO);
 
-    LocationDTO toLocationDto(Location location);
+    // TeamLocationDTO -> TeamLocation 매핑
+    @Mapping(source = "city", target = "city")
+    @Mapping(source = "region", target = "region")
+    TeamLocation toTeamLocationEntity(LocationDTO locationDTO); // LocationDTO -> TeamLocation 매핑
 
-    Location toLocationEntity(LocationDTO locationDTO);
+    // TeamLocationDTO를 TeamLocation으로 매핑하는 메서드 추가
+    TeamLocation toTeamLocationEntity(TeamLocationDTO teamLocationDTO);
+
+    // TeamLocation -> TeamLocationDTO 매핑
+    @Mapping(source = "city", target = "city")
+    @Mapping(source = "region", target = "region")
+    LocationDTO toLocationDto(TeamLocation teamLocation); // TeamLocation -> LocationDTO 매핑
 
     // Stadium 관련 매핑 메서드 추가
     StadiumDTO toStadiumDto(Stadium stadium);
